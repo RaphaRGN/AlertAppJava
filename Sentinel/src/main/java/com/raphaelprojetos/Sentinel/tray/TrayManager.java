@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.TrayIcon;
 
+
+// TODO: corrigir a questão da imagem
 public class TrayManager extends JFrame {
 
     public TrayManager() {
