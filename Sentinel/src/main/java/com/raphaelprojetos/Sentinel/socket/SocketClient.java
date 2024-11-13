@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.net.Socket;
 
 // TODO: Criar a lógica do socket
-public class SocketManager {
+public class SocketClient {
 
     private Socket socket;
 
-    public Socket conect() {
+    public Socket connect() {
 
         final int MAXIMUM_RECONECTION_ATTEMPTS = 5;
         int reconection = 0;

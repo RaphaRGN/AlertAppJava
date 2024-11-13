@@ -19,7 +19,8 @@ public class TrayManager extends JFrame {
         }
 
         SystemTray tray = SystemTray.getSystemTray();
-        Image image = Toolkit.getDefaultToolkit().createImage("SimboloBrigada2.png");
+        ImageIcon icon = new ImageIcon("SimboloBrigada2.png");
+        Image image = icon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
 
         TrayIcon trayIcon = new TrayIcon(image, "Sentinel");
 
@@ -42,19 +43,6 @@ public class TrayManager extends JFrame {
            tela1.setLocationRelativeTo(null);
            tela1.setLayout(null);
 
-
-            JPanel painelComImagem = new JPanel() {
-
-                @Override
-                protected void paintComponent(Graphics g) {
-                    super.paintComponent(g);
-                    ImageIcon imagemFundo = new ImageIcon("SimboloBrigada2.png"); // Caminho da imagem
-                    g.drawImage(imagemFundo.getImage(), 0, 0, getWidth(), getHeight(), this);
-                }
-            };
-
-            painelComImagem.setLayout(null);
-            tela1.setContentPane(painelComImagem);
 
            //Label e campo usuário
 
