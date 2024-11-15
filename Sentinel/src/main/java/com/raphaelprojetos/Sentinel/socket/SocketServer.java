@@ -5,8 +5,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class SocketServer {
-
-
     ServerSocket server;
 
     public void startServer() {
@@ -16,7 +14,6 @@ public class SocketServer {
             while (true) {
                 Socket clientSocket = server.accept();
                 System.out.println("Cliente conectado: " + clientSocket.getInetAddress());
-
             }
         } catch (IOException e) {
             System.err.println("Erro ao iniciar o servidor:");
