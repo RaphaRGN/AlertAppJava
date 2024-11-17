@@ -10,6 +10,7 @@ public class Usuario {
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     public long ID;
     public String nome;
+    private int senha;
     public boolean podeMandarAlertas;
 
     public long getID() {

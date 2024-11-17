@@ -14,6 +14,7 @@ public class SocketServer {
             while (true) {
                 Socket clientSocket = server.accept();
                 System.out.println("Cliente conectado: " + clientSocket.getInetAddress());
+
             }
         } catch (IOException e) {
             System.err.println("Erro ao iniciar o servidor:");
