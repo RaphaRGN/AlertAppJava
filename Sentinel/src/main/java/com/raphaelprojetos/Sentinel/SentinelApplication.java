@@ -20,7 +20,7 @@ public class SentinelApplication {
 
 		SocketServer serverHandler = new SocketServer();
 
-		//Icone bandeja
+
 		JFrameManager jFrameManager = new JFrameManager();
 		jFrameManager.initTray();
 
