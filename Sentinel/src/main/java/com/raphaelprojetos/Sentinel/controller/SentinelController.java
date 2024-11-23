@@ -4,10 +4,7 @@ import com.raphaelprojetos.Sentinel.entitys.Alerta;
 import com.raphaelprojetos.Sentinel.services.SentinelService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
-
-//TODO: Terminar o controller
 
 @Controller
 @RequestMapping("/alertas")

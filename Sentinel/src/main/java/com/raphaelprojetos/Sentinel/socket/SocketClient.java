@@ -1,14 +1,17 @@
 package com.raphaelprojetos.Sentinel.socket;
 
+import org.springframework.stereotype.Component;
+
 import java.io.IOException;
 import java.net.Socket;
 
-// TODO: Criar a lógica do socket
+@Component
 public class SocketClient {
 
     private Socket socket;
+    private SocketServer server;
 
-    public Socket connect() {
+    public void connect() {
 
         final int MAXIMUM_RECONECTION_ATTEMPTS = 5;
         int reconection = 0;
@@ -30,6 +33,5 @@ public class SocketClient {
             }
 
         }
-        return socket;
     }
 }

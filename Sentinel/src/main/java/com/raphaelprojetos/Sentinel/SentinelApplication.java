@@ -7,6 +7,9 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 @SpringBootApplication
 public class SentinelApplication {
 	public static void main(String[] args) {
@@ -19,24 +22,28 @@ public class SentinelApplication {
 		context.getBean(JFrameManager.class);
 
 		SocketServer serverHandler = new SocketServer();
+		context.getAutowireCapableBeanFactory().autowireBean(serverHandler);
 
 
-		JFrameManager jFrameManager = new JFrameManager();
+		JFrameManager jFrameManager = context.getBean(JFrameManager.class);
 		jFrameManager.initTray();
 
-		new Thread(serverHandler::startServer).start();
+		ExecutorService executor = Executors.newFixedThreadPool(2);
+		executor.submit(serverHandler::startServer);
+		executor.submit(() -> {
+			SocketClient clientManager = context.getBean(SocketClient.class);
+			clientManager.connect();
+		});
 
 		try {
 			Thread.sleep(1000); // 1 segundo
+
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+
 		}
 
 		SocketClient manager = new SocketClient();
 		manager.connect();
-
 	}
 }
-
-
-

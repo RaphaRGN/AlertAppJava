@@ -1,5 +1,6 @@
 package com.raphaelprojetos.Sentinel.tray;
 
+import com.raphaelprojetos.Sentinel.entitys.Alerta;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +10,6 @@ import java.awt.*;
 @Component
 public class JFrameManager extends JFrame {
 
-    private JFrame telaPrincipal;
     private JPanel cardPanel;
     private CardLayout cardLayout;
 
@@ -46,7 +46,7 @@ public class JFrameManager extends JFrame {
     }
 
     public void initApplication() {
-        telaPrincipal = new JFrame("Sentinel");
+        JFrame telaPrincipal = new JFrame("Sentinel");
         telaPrincipal.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         telaPrincipal.setSize(500, 500);
         telaPrincipal.setLocationRelativeTo(null);
@@ -72,6 +72,7 @@ public class JFrameManager extends JFrame {
         JButton botaoLogin = new JButton("Ir para Login");
         botaoLogin.setBounds(200, 300, 150, 30);
         botaoLogin.addActionListener(e -> cardLayout.show(cardPanel, "Login"));
+
 
         panel.add(botaoLogin);
         return panel;
