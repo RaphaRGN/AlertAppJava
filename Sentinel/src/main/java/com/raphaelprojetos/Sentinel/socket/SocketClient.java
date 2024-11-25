@@ -1,11 +1,10 @@
 package com.raphaelprojetos.Sentinel.socket;
 
-import org.springframework.stereotype.Component;
-
 import java.io.IOException;
 import java.net.Socket;
 
-@Component
+
+
 public class SocketClient {
 
     private Socket socket;

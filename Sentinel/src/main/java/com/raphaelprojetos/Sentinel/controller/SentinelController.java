@@ -1,7 +1,7 @@
 package com.raphaelprojetos.Sentinel.controller;
 
-import com.raphaelprojetos.Sentinel.entitys.Alerta;
-import com.raphaelprojetos.Sentinel.services.SentinelService;
+import com.raphaelprojetos.Sentinel.entities.Alerta;
+import com.raphaelprojetos.Sentinel.services.AlertaService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -10,11 +10,11 @@ import java.util.List;
 @RequestMapping("/alertas")
 public class SentinelController {
 
-    private final SentinelService sentinelService;
+    private final AlertaService alertaService;
 
-    public  SentinelController (SentinelService sentinelService){
+    public  SentinelController (AlertaService alertaService){
 
-        this.sentinelService = sentinelService;
+        this.alertaService = alertaService;
 
     }
 
@@ -22,7 +22,7 @@ public class SentinelController {
     @ResponseBody
     public Alerta create (Alerta alerta){
 
-        return sentinelService.create(alerta);
+        return alertaService.create(alerta);
 
     }
 
@@ -30,7 +30,7 @@ public class SentinelController {
     @ResponseBody
     public List<Alerta> list(){
 
-        return sentinelService.list();
+        return alertaService.list();
 
     }
 
@@ -38,7 +38,7 @@ public class SentinelController {
     @ResponseBody
     public Alerta update (@RequestBody Alerta alerta){
 
-        return sentinelService.update(alerta);
+        return alertaService.update(alerta);
 
     }
 
@@ -46,7 +46,7 @@ public class SentinelController {
     @ResponseBody
     public List<Alerta> delete(@PathVariable ("ID") long ID){
 
-        sentinelService.delete(ID);
+        alertaService.delete(ID);
         return list();
     }
 

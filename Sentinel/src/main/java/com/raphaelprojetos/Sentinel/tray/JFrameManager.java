@@ -1,6 +1,5 @@
 package com.raphaelprojetos.Sentinel.tray;
 
-import com.raphaelprojetos.Sentinel.entitys.Alerta;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
@@ -13,36 +12,11 @@ public class JFrameManager extends JFrame {
     private JPanel cardPanel;
     private CardLayout cardLayout;
 
-    public void initTray() {
-        if (!SystemTray.isSupported()) {
-            System.out.println("Funcionalidade de ícone de bandeja não suportada");
-            return;
-        }
-
-        SystemTray tray = SystemTray.getSystemTray();
-        PopupMenu popupMenu = new PopupMenu();
-
-        ImageIcon icon = new ImageIcon(getClass().getResource("/images/SimboloBrigada.png"));
-        Image image = icon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
-
-        TrayIcon trayIcon = new TrayIcon(image, "Sentinel", popupMenu);
-
-        MenuItem abrirOSentinel = new MenuItem("Abrir o Sentinel");
-        popupMenu.add(abrirOSentinel);
-
-        abrirOSentinel.addActionListener(e -> showInterface());
-
-        try {
-            tray.add(trayIcon);
-            System.out.println("Ícone adicionado à bandeja");
-        } catch (AWTException e) {
-            System.err.println("Erro ao adicionar ícone à bandeja");
-        }
-    }
 
     @PostConstruct
-    public void showInterface() {
+    public Runnable showInterface() {
         SwingUtilities.invokeLater(this::initApplication);
+        return null;
     }
 
     public void initApplication() {
@@ -72,6 +46,7 @@ public class JFrameManager extends JFrame {
         JButton botaoLogin = new JButton("Ir para Login");
         botaoLogin.setBounds(200, 300, 150, 30);
         botaoLogin.addActionListener(e -> cardLayout.show(cardPanel, "Login"));
+
 
 
         panel.add(botaoLogin);

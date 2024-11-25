@@ -3,6 +3,7 @@ package com.raphaelprojetos.Sentinel;
 import com.raphaelprojetos.Sentinel.socket.SocketClient;
 import com.raphaelprojetos.Sentinel.socket.SocketServer;
 import com.raphaelprojetos.Sentinel.tray.JFrameManager;
+import com.raphaelprojetos.Sentinel.tray.TrayManager;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -26,7 +27,8 @@ public class SentinelApplication {
 
 
 		JFrameManager jFrameManager = context.getBean(JFrameManager.class);
-		jFrameManager.initTray();
+		TrayManager trayManager = new TrayManager();
+		trayManager.initTray();
 
 		ExecutorService executor = Executors.newFixedThreadPool(2);
 		executor.submit(serverHandler::startServer);
