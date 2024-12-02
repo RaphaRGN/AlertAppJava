@@ -19,7 +19,7 @@ public class SocketClient {
 
             try {
 
-                socket = new Socket("26.92.48.121", 8080);
+                socket = new Socket("192.168.0.16", 8080);
                 System.out.println("Conectado");
                 reconection++;
 

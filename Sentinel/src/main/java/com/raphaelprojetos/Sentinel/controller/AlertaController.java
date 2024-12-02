@@ -8,11 +8,11 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/alertas")
-public class SentinelController {
+public class AlertaController {
 
     private final AlertaService alertaService;
 
-    public  SentinelController (AlertaService alertaService){
+    public AlertaController(AlertaService alertaService){
 
         this.alertaService = alertaService;
 
@@ -42,11 +42,11 @@ public class SentinelController {
 
     }
 
-    @DeleteMapping("{ID}")
+    @DeleteMapping("{Id}")
     @ResponseBody
-    public List<Alerta> delete(@PathVariable ("ID") long ID){
+    public List<Alerta> delete(@PathVariable ("Id") long Id){
 
-        alertaService.delete(ID);
+        alertaService.delete(Id);
         return list();
     }
 

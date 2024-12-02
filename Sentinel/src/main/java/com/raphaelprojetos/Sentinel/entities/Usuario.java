@@ -6,7 +6,7 @@ import org.springframework.data.annotation.Id;
 
 
 @Entity
-@Table (name = "usuarios")
+@Table(name = "usuarios")
 public class Usuario {
 
     @GeneratedValue (strategy = GenerationType.IDENTITY)

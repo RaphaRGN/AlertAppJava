@@ -49,3 +49,4 @@ public class SentinelApplication {
 		manager.connect();
 	}
 }
+

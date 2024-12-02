@@ -26,7 +26,7 @@ public class AlertaService {
 
     public List<Alerta> list() {
 
-        Sort sort = Sort.by("ID").descending().and(Sort.by("titulo").ascending());
+        Sort sort = Sort.by("Id").descending().and(Sort.by("titulo").ascending());
         return alertaRepository.findAll(sort);
 
     }
@@ -37,9 +37,9 @@ public class AlertaService {
 
     }
 
-    public List<Alerta> delete (Long ID){
+    public List<Alerta> delete (Long Id){
 
-        alertaRepository.deleteById(ID);
+        alertaRepository.deleteById(Id);
         return list();
 
     }

@@ -11,7 +11,7 @@ import java.net.Socket;
 public class SocketServer {
 
     ServerSocket server;
-    public final int port = 8080;
+    private final int port = 8080;
 
     public void startServer() {
         try {

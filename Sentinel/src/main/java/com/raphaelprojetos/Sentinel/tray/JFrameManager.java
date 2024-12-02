@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 @Component
@@ -14,9 +15,8 @@ public class JFrameManager extends JFrame {
 
 
     @PostConstruct
-    public Runnable showInterface() {
+    public void showInterface() {
         SwingUtilities.invokeLater(this::initApplication);
-        return null;
     }
 
     public void initApplication() {
@@ -41,41 +41,41 @@ public class JFrameManager extends JFrame {
     }
 
     private JPanel createMainPanel() {
-        JPanel panel = new JPanel(null);
+        JPanel panelMain = new JPanel(null);
 
         JButton botaoLogin = new JButton("Ir para Login");
         botaoLogin.setBounds(200, 300, 150, 30);
         botaoLogin.addActionListener(e -> cardLayout.show(cardPanel, "Login"));
+        panelMain.add(botaoLogin);
 
+        JButton botaoMonitoramento = new JButton ("Configurações");
 
-
-        panel.add(botaoLogin);
-        return panel;
+        return panelMain;
     }
 
     private JPanel createLoginPanel() {
-        JPanel panel = new JPanel(null);
+        JPanel panelLogin = new JPanel(null);
 
         JLabel labelUsuario = new JLabel("Usuário:");
         labelUsuario.setBounds(80, 100, 70, 25);
-        panel.add(labelUsuario);
+        panelLogin.add(labelUsuario);
 
         JTextField campoUsuario = new JTextField();
         campoUsuario.setBounds(150, 100, 200, 25);
-        panel.add(campoUsuario);
+        panelLogin.add(campoUsuario);
 
         JLabel labelSenha = new JLabel("Senha:");
         labelSenha.setBounds(80, 150, 70, 25);
-        panel.add(labelSenha);
+        panelLogin.add(labelSenha);
 
         JPasswordField campoSenha = new JPasswordField();
         campoSenha.setBounds(150, 150, 200, 25);
-        panel.add(campoSenha);
+        panelLogin.add(campoSenha);
 
         JButton botaoVoltar = new JButton("Voltar");
         botaoVoltar.setBounds(100, 300, 100, 30);
         botaoVoltar.addActionListener(e -> cardLayout.show(cardPanel, "Main"));
-        panel.add(botaoVoltar);
+        panelLogin.add(botaoVoltar);
 
         JButton botaoLogin = new JButton("Fazer login");
         botaoLogin.setBounds(250, 300, 200, 30);
@@ -84,8 +84,8 @@ public class JFrameManager extends JFrame {
             String senha = new String(campoSenha.getPassword());
             System.out.println("Usuário: " + usuario + ", Senha: " + senha);
         });
-        panel.add(botaoLogin);
+        panelLogin.add(botaoLogin);
 
-        return panel;
+        return panelLogin;
     }
 }

@@ -5,12 +5,12 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table (name = "Alertas")
+@Table(name = "alertas")
 public class Alerta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long Id;
+    private Long Id;
     public String codigo;
     public String titulo;
     public LocalDateTime tempo;
