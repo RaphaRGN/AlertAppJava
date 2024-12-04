@@ -1,5 +1,6 @@
 package com.raphaelprojetos.Sentinel.tray;
 
+import com.raphaelprojetos.Sentinel.config.ApiClient;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +13,6 @@ public class JFrameManager extends JFrame {
 
     private JPanel cardPanel;
     private CardLayout cardLayout;
-
 
     @PostConstruct
     public void showInterface() {
@@ -49,6 +49,8 @@ public class JFrameManager extends JFrame {
         panelMain.add(botaoLogin);
 
         JButton botaoMonitoramento = new JButton ("Configurações");
+        botaoMonitoramento.setBounds(200, 100, 150, 30);
+        panelMain.add(botaoMonitoramento);
 
         return panelMain;
     }

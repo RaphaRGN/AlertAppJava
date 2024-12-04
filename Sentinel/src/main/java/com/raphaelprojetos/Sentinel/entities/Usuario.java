@@ -11,13 +11,13 @@ public class Usuario {
 
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     @Id
-    private long Id;
+    private Long Id;
 
     @Column(nullable = false)
     public String nome;
 
     @Column(nullable = false)
-    private int senha;
+    private String senha;
 
     @Column(nullable = false)
     public boolean admin;
@@ -30,11 +30,11 @@ public class Usuario {
         this.admin = admin;
     }
 
-    public int getSenha() {
+    public String getSenha() {
         return senha;
     }
 
-    public void setSenha(int senha) {
+    public void setSenha(String senha) {
         this.senha = senha;
     }
 

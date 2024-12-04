@@ -1,6 +1,7 @@
 package com.raphaelprojetos.Sentinel.config;
 
 
+import java.net.HttpURLConnection;
 import java.net.URL;
 
 //Todo: TERMINAR A CONFIG D HTTPCONECT
@@ -15,8 +16,4 @@ public class ApiClient {
 
             return "TESTE";
     }
-
-
-
-
 }
