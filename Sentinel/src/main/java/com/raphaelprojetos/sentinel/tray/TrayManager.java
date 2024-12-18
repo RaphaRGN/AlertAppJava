@@ -1,4 +1,4 @@
-package com.raphaelprojetos.Sentinel.tray;
+package com.raphaelprojetos.sentinel.tray;
 
 import jakarta.annotation.PostConstruct;
 

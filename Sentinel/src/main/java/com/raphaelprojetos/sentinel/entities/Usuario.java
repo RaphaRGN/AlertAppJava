@@ -1,8 +1,7 @@
-package com.raphaelprojetos.Sentinel.entities;
+package com.raphaelprojetos.sentinel.entities;
 
 
 import jakarta.persistence.*;
-import org.springframework.data.annotation.Id;
 
 
 @Entity
@@ -11,7 +10,7 @@ public class Usuario {
 
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     @Id
-    private Long Id;
+    private Long id;
 
     @Column(nullable = false)
     public String nome;
@@ -47,13 +46,10 @@ public class Usuario {
     }
 
     public long getId() {
-        return Id;
+        return id;
     }
 
     public void setId(long id) {
-        Id = id;
+        this.id = id;
     }
-
-
-
 }

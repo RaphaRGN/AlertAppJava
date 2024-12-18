@@ -1,7 +1,7 @@
-package com.raphaelprojetos.Sentinel.services;
+package com.raphaelprojetos.sentinel.services;
 
-import com.raphaelprojetos.Sentinel.entities.Alerta;
-import com.raphaelprojetos.Sentinel.repository.AlertaRepository;
+import com.raphaelprojetos.sentinel.entities.Alerta;
+import com.raphaelprojetos.sentinel.repository.AlertaRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 

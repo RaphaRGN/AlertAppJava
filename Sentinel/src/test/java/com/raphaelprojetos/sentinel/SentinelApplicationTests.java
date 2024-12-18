@@ -1,4 +1,4 @@
-package com.raphaelprojetos.Sentinel;
+package com.raphaelprojetos.sentinel;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

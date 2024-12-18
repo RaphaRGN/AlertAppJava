@@ -1,6 +1,7 @@
-package com.raphaelprojetos.Sentinel.dto;
+package com.raphaelprojetos.sentinel.dto;
 
-import org.springframework.cglib.core.Local;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 
@@ -16,9 +17,9 @@ public class AlertaDTO {
 
     }
 
-    public AlertaDTO(Long id, String codigo, String titulo, LocalDateTime tempo, String descricao ){
+    public AlertaDTO(String codigo, String titulo, LocalDateTime tempo, String descricao ){
 
-        this.id = id;
+
         this.codigo = codigo;
         this.titulo = titulo;
         this.tempoFormatado = tempo != null ? tempo.toString() : "";
@@ -65,4 +66,10 @@ public class AlertaDTO {
     public void setDescricao(String descricao) {
         this.descricao = descricao;
     }
+
+    public String toJson() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(this);
+    }
+
 }

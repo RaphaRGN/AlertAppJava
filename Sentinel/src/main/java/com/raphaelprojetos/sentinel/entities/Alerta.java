@@ -1,27 +1,27 @@
-package com.raphaelprojetos.Sentinel.entities;
+package com.raphaelprojetos.sentinel.entities;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "alertas")
 public class Alerta {
 
-    @Id
+
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    @Id
+    private Long id;
     public String codigo;
     public String titulo;
     public LocalDateTime tempo;
     public String descricao;
 
     public Long getId() {
-        return Id;
+        return id;
     }
 
     public void setId(Long id) {
-        Id = id;
+        this.id = id;
     }
 
     public String getCodigo() {

@@ -1,7 +1,7 @@
-package com.raphaelprojetos.Sentinel.controller;
+package com.raphaelprojetos.sentinel.controller;
 
-import com.raphaelprojetos.Sentinel.entities.Usuario;
-import com.raphaelprojetos.Sentinel.services.UsuarioService;
+import com.raphaelprojetos.sentinel.entities.Usuario;
+import com.raphaelprojetos.sentinel.services.UsuarioService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

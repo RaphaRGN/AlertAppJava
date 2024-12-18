@@ -1,7 +1,7 @@
-package com.raphaelprojetos.Sentinel.controller;
+package com.raphaelprojetos.sentinel.controller;
 
-import com.raphaelprojetos.Sentinel.entities.Alerta;
-import com.raphaelprojetos.Sentinel.services.AlertaService;
+import com.raphaelprojetos.sentinel.entities.Alerta;
+import com.raphaelprojetos.sentinel.services.AlertaService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.raphaelprojetos.Sentinel.dto;
+package com.raphaelprojetos.sentinel.dto;
 
 
 public class UsuarioDTO {
