@@ -1,10 +1,10 @@
 package com.raphaelprojetos.sentinel.dao;
-
-import com.raphaelprojetos.sentinel.database.Database;
 import com.raphaelprojetos.sentinel.dto.AlertaDTO;
 
+import javax.swing.*;
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +21,7 @@ public class AlertaDAO {
 
             stmt.setString(1, alerta.getCodigo());
             stmt.setString(2, alerta.getTitulo());
-            stmt.setObject(3, LocalDateTime.now()); // Salva o tempo atual
+            stmt.setObject(3, LocalDateTime.now());
             stmt.setString(4, alerta.getDescricao());
 
             stmt.executeUpdate();
@@ -102,6 +102,27 @@ public class AlertaDAO {
         }
     }
 
+    public void deletarTodosAlertas(){
+        String sql = "DELETE FROM alertas";
+        try (Connection conn = getConnection();
+        PreparedStatement stmt = conn.prepareStatement(sql)){
+
+            int linhasAfetadas = stmt.executeUpdate();
+            if (linhasAfetadas > 0){
+                JOptionPane.showMessageDialog(null, "Alertas deletados !");
+
+            }
+            else{
+                JOptionPane.showMessageDialog(null, "Nenhum alerta a deletar");
+
+            }
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Erro ao deletar todos alertas");
+        }
+    }
+
     public List<AlertaDTO> buscarUltimosAlertas(int limite) {
         String sql = "SELECT id, codigo, titulo, descricao, tempo FROM alertas ORDER BY tempo DESC LIMIT ?";
         List<AlertaDTO> alertas = new ArrayList<>();
@@ -118,8 +139,10 @@ public class AlertaDAO {
                     alerta.setCodigo(rs.getString("codigo"));
                     alerta.setTitulo(rs.getString("titulo"));
                     alerta.setDescricao(rs.getString("descricao"));
-                    alerta.setTempoFormatado(rs.getTimestamp("tempo").toLocalDateTime().toString());
+                    alerta.setTempoFormatado(rs.getTimestamp("tempo").toLocalDateTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH-mm-ss"))
+                    );
                     alertas.add(alerta);
+
                 }
             }
 

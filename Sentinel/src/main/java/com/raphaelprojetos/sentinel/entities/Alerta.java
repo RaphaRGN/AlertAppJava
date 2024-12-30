@@ -1,12 +1,13 @@
 package com.raphaelprojetos.sentinel.entities;
 
 import jakarta.persistence.*;
+import org.springframework.cglib.core.Local;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "alertas")
 public class Alerta {
-
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id

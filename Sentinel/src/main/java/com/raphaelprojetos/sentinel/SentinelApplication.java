@@ -1,6 +1,6 @@
 package com.raphaelprojetos.sentinel;
 
-import com.raphaelprojetos.sentinel.tray.JFrameManager;
+import com.raphaelprojetos.sentinel.tray.SwingManager;
 import com.raphaelprojetos.sentinel.tray.TrayManager;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,7 +14,7 @@ public class SentinelApplication {
 				.web(WebApplicationType.NONE)
 				.run(args);
 
-		JFrameManager jFrameManager = context.getBean(JFrameManager.class);
+		SwingManager swingManager = context.getBean(SwingManager.class);
 		TrayManager trayManager = new TrayManager();
 		trayManager.initTray();
 

@@ -2,15 +2,17 @@ package com.raphaelprojetos.sentinel.dto;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class AlertaDTO {
 
     private Long id;
     private String codigo;
     private String titulo;
-    public String tempoFormatado;
+    public LocalDateTime tempoFormatado;
     public String descricao;
 
     public AlertaDTO(){
@@ -22,7 +24,7 @@ public class AlertaDTO {
 
         this.codigo = codigo;
         this.titulo = titulo;
-        this.tempoFormatado = tempo != null ? tempo.toString() : "";
+        this.tempoFormatado = tempo;
         this.descricao = descricao;
 
     }
@@ -52,11 +54,14 @@ public class AlertaDTO {
     }
 
     public String getTempoFormatado() {
-        return tempoFormatado;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH-mm-ss");
+        return this.tempoFormatado.format(formatter);
     }
 
     public void setTempoFormatado(String tempoFormatado) {
-        this.tempoFormatado = tempoFormatado;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH-mm-ss");
+        this.tempoFormatado = LocalDateTime.parse(tempoFormatado, formatter);
+
     }
 
     public String getDescricao() {

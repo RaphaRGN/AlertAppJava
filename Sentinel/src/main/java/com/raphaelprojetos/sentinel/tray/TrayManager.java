@@ -1,18 +1,17 @@
 package com.raphaelprojetos.sentinel.tray;
 
-import jakarta.annotation.PostConstruct;
-
 import javax.swing.*;
 import java.awt.*;
 
 public class TrayManager {
 
-    private final JFrameManager jFrameManager = new JFrameManager();
+    private final SwingManager swingManager = new SwingManager();
 
-    public void initTray(){
+    public void initTray() {
 
         if (!SystemTray.isSupported()) {
             System.out.println("Funcionalidade de ícone de bandeja não suportada");
+
             return;
         }
 
@@ -27,19 +26,17 @@ public class TrayManager {
         MenuItem abrirOSentinel = new MenuItem("Abrir o Sentinel");
         popupMenu.add(abrirOSentinel);
 
-        abrirOSentinel.addActionListener(e -> jFrameManager.showInterface());
+        abrirOSentinel.addActionListener(e -> swingManager.showInterface());
 
         try {
             tray.add(trayIcon);
             System.out.println("Ícone adicionado à bandeja");
-        } catch (AWTException e) {
+
+        }
+        catch (AWTException e) {
             System.err.println("Erro ao adicionar ícone à bandeja");
+
         }
     }
-    @PostConstruct
-    public void showInterface() {
-        SwingUtilities.invokeLater(this::showInterface);
-    }
-
 }
 
