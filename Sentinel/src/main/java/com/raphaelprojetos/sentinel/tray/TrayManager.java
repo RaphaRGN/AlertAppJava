@@ -1,5 +1,7 @@
 package com.raphaelprojetos.sentinel.tray;
 
+import com.raphaelprojetos.sentinel.rabbitmq.AlertaConsumer;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -15,6 +17,7 @@ public class TrayManager {
             return;
         }
 
+
         SystemTray tray = SystemTray.getSystemTray();
         PopupMenu popupMenu = new PopupMenu();
 
@@ -25,8 +28,11 @@ public class TrayManager {
 
         MenuItem abrirOSentinel = new MenuItem("Abrir o Sentinel");
         popupMenu.add(abrirOSentinel);
-
         abrirOSentinel.addActionListener(e -> swingManager.showInterface());
+
+        MenuItem fecharAplicacao = new MenuItem("Sair");
+        popupMenu.add(fecharAplicacao);
+        fecharAplicacao.addActionListener(e -> System.exit(0));
 
         try {
             tray.add(trayIcon);

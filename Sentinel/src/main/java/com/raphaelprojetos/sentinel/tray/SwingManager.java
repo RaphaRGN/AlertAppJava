@@ -5,7 +5,9 @@
     import com.raphaelprojetos.sentinel.dao.UsuarioDAO;
     import com.raphaelprojetos.sentinel.dto.AlertaDTO;
     import com.raphaelprojetos.sentinel.dto.UsuarioDTO;
+    import com.raphaelprojetos.sentinel.rabbitmq.AlertaConsumer;
     import com.raphaelprojetos.sentinel.rabbitmq.RabbitMQClient;
+    import com.raphaelprojetos.sentinel.report.ExcelReportGenerator;
     import org.jdesktop.swingx.JXButton;
     import org.jdesktop.swingx.JXTable;
     import org.jdesktop.swingx.JXTextField;
@@ -19,22 +21,78 @@
     import java.util.List;
 
     @Component
-    public class SwingManager extends JFrame {
+    public class SwingManager extends JFrame implements AlertaConsumer.ConsumerCallback {
 
         private JPanel cardPanel;
         private CardLayout cardLayout;
         private UsuarioDTO usuarioLogado;
         private JXTable tabelaAlertas;
         private JXTable tabelaUsuarios;
+        private AlertaConsumer alertaConsumer;
+        private JFrame popupFrame;
+        private ExcelReportGenerator excelGenerator = new ExcelReportGenerator();
 
         public void showInterface() {
             SwingUtilities.invokeLater(this::initApplication);
             try {
                 UIManager.setLookAndFeel(new FlatLightLaf()); //Carrega o Look and feel
+                alertaConsumer = new AlertaConsumer(this);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+
+        @Override
+        public void onMessageReceived(String mensagem) {
+            SwingUtilities.invokeLater(() -> {
+                mostrarPopup(mensagem);
+                atualizarTabelaAlertas();
+            });
+        }
+
+        private void mostrarPopup(String mensagem) {
+            if (popupFrame != null && popupFrame.isVisible()) {
+                popupFrame.dispose();
+            }
+            JFrame bloqueioFrame = new JFrame();
+            bloqueioFrame.setUndecorated(true);
+            bloqueioFrame.setAlwaysOnTop(true);
+            bloqueioFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+
+            bloqueioFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            bloqueioFrame.setBackground(new Color(0, 0, 0, 200)); // Fundo semitransparente
+
+            JLabel mensagemLabel = new JLabel("<html><h1 style='text-align:center;color:white;'>" + mensagem + "</h1></html>");
+            mensagemLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            bloqueioFrame.add(mensagemLabel);
+
+            bloqueioFrame.setVisible(true);
+
+            Timer cooldownTimer = new Timer(15000, e -> {
+                bloqueioFrame.dispose(); // Fecha a tela de bloqueio
+            });
+            cooldownTimer.setRepeats(false); // Garante execução única
+            cooldownTimer.start();
+        }
+
+        SwingWorker<Void, Void> consumerWorker = new SwingWorker<>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                alertaConsumer = new AlertaConsumer(SwingManager.this);
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    get();
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, "Erro ao iniciar o consumidor: " + e.getMessage());
+                }
+                consumerWorker.execute();
+            }
+        };
 
         //Método principal
         public void initApplication() {
@@ -51,12 +109,13 @@
             JPanel loginPanel = createLoginPanel();
             JPanel configPanel = createConfigPanel();
             JPanel userPanel = createUserPanel();
-            JPanel ReportsPanel = createReportsPanel();
+            JPanel reportsPanel = createReportsPanel();
+
 
             cardPanel.add(mainPanel, "Main");
             cardPanel.add(loginPanel, "Login");
             cardPanel.add(configPanel, "Config");
-            cardPanel.add(ReportsPanel, "Reports");
+            cardPanel.add(reportsPanel, "Reports");
             cardPanel.add(userPanel, "User");
 
 
@@ -90,6 +149,7 @@
                         usuarioLogado = null;
                         JOptionPane.showMessageDialog(null, "Você foi desconectado !");
                         atualizarNomeBotao(botaoLogin);
+                        atualizarTabelaAlertas();
                         cardLayout.show(cardPanel, "Main");
                     }
                 }
@@ -109,6 +169,11 @@
             botaoConfiguracao.setBounds(620, 10, 150, 30);
             botaoConfiguracao.addActionListener(e -> cardLayout.show(cardPanel, "Config"));
             panelMain.add(botaoConfiguracao);
+
+            JXButton botaoReports = new JXButton("Gerar relatórios");
+            botaoReports.setBounds(440, 10, 150, 30);
+            botaoReports.addActionListener( e-> cardLayout.show(cardPanel, "Reports"));
+            panelMain.add(botaoReports);
 
 
             JScrollPane scrollPane = new JScrollPane(tabelaAlertas);
@@ -171,11 +236,12 @@
 
             JButton botaoEnviarOcorrencia = new JButton("Enviar alerta");
             botaoEnviarOcorrencia.setBounds(750, 500, 150, 30);
+            botaoEnviarOcorrencia.setToolTipText("Clique aqui para enviar o alerta");
             botaoEnviarOcorrencia.addActionListener(e -> {
                 if (usuarioLogado == null || !usuarioLogado.isAdmin()) {
                     JOptionPane.showMessageDialog(null, "Acesso negado. Apenas administradores podem enviar alertas.");
-                    return;
 
+                    return;
                 }
                 SwingWorker<Void, Void> worker = new SwingWorker<>() {
                     @Override
@@ -238,7 +304,7 @@
 
                 if (usuario != null) {
                     usuarioLogado = usuario;
-                    JOptionPane.showMessageDialog(null, "Login bem-sucedido! Bem-vindo, " + usuario.getNome());
+                    JOptionPane.showMessageDialog(null, "Bem-vindo, " + usuario.getNome() + " !");
                     cardLayout.show(cardPanel, "Main");
                 } else {
                     JOptionPane.showMessageDialog(null, "Usuário ou senha inválidos.");
@@ -297,10 +363,48 @@
                 }
             });
 
-
             item1Config.addActionListener(e -> {
                 cardLayout.show(cardPanel, "User");
 
+            });
+            JMenuItem item2EditarUser = new JMenuItem("Editar usuário");
+            popupMenuConfig.add(item2EditarUser);
+
+            item2EditarUser.addActionListener(e -> {
+               int linhaSelecionada = tabelaUsuarios.getSelectedRow();
+
+                if(tabelaUsuarios.getSelectedRow() == -1){
+
+                    return;
+                }
+                Long idUsuario = (Long) tabelaUsuarios.getValueAt(linhaSelecionada, 0);
+
+                JPanel editUserPanel = createEditUserPanel(idUsuario);
+                cardPanel.add(editUserPanel, "Edit");
+                cardLayout.show(cardPanel, "Edit");
+
+            });
+
+            JMenuItem item3EditarUser = new JMenuItem("Deletar usuário");
+            popupMenuConfig.add(item3EditarUser);
+
+            item3EditarUser.addActionListener( e -> {
+                UsuarioDAO usuarioDao = new UsuarioDAO();
+                int linhaSelecionada = tabelaUsuarios.getSelectedRow();
+
+                if(tabelaUsuarios.getSelectedRow() == -1){
+
+                    return;
+                }
+                Long idUsuario = (Long) tabelaUsuarios.getValueAt(linhaSelecionada, 0);
+
+               int confirmacao = JOptionPane.showOptionDialog(null, "Deseja deletar o usuário ?", "Confirmação",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, new String[]{"Sim", "Não"}, "Não");
+
+                    if (confirmacao == JOptionPane.YES_NO_OPTION){
+                        usuarioDao.deletarUsuarioPorId(idUsuario);
+                        JOptionPane.showMessageDialog(null, "Usuário deletado com sucesso !");
+                    }
             });
 
             return panelConfig;
@@ -363,18 +467,122 @@
             return panelCriacaoUsuario;
         }
 
+        private JPanel createEditUserPanel(Long idUsuario) {
+           JPanel panelEditarUserAtual = new JPanel(null);
+            panelEditarUserAtual.setBounds(200, 200, 400, 300);
+
+            UsuarioDAO usuarioDAO = new UsuarioDAO();
+            int linhaSelecionada = tabelaUsuarios.getSelectedRow();
+
+            if (linhaSelecionada == -1){
+
+               return panelEditarUserAtual;
+            }
+
+            UsuarioDTO usuarioSelecionado = usuarioDAO.buscarUsuarioPorId(idUsuario);
+
+                String nomeAtualUsuario = usuarioSelecionado.getNome();
+                JXTextField campoUsuarioAtual = new JXTextField();
+                campoUsuarioAtual.setText(nomeAtualUsuario);
+                campoUsuarioAtual.setBounds(150, 50, 200, 30);
+                panelEditarUserAtual.add(campoUsuarioAtual);
+
+                String senhaAtual = usuarioSelecionado.getSenha();
+                JPasswordField campoSenhaUsuarioAtual = new JPasswordField();
+                campoSenhaUsuarioAtual.setBounds(150, 100, 200, 30);
+                panelEditarUserAtual.add(campoSenhaUsuarioAtual);
+
+                boolean userEAdmin = usuarioSelecionado.isAdmin();
+                JCheckBox checkboxAdmin = new JCheckBox();
+                checkboxAdmin.setBounds(150, 150, 200, 30);
+                panelEditarUserAtual.add(checkboxAdmin);
+
+                checkboxAdmin.setSelected(userEAdmin);
+
+                JXButton botaoIrParaMain = new JXButton("Voltar");
+                botaoIrParaMain.setBounds(250, 200, 150, 30);
+                botaoIrParaMain.addActionListener(e->{
+                    cardLayout.show(cardPanel, "Main");
+
+                        });
+
+                JXButton botaoSalvarUsuario = new JXButton("Salvar Usuário");
+                botaoSalvarUsuario.setBounds(150, 200, 150, 30);
+                panelEditarUserAtual.add(botaoSalvarUsuario);
+                botaoSalvarUsuario.addActionListener(e -> {
+
+                    String nome = campoUsuarioAtual.getText();
+                    String senha = new String(campoSenhaUsuarioAtual.getPassword());
+                    boolean isAdmin = checkboxAdmin.isSelected();
+
+                    if (nome.trim().isEmpty()){
+                        JOptionPane.showMessageDialog(null, "O campo 'nome' não pode ser vazios !");
+
+                    }
+
+                    if (senha.isEmpty()) {
+                        senha = senhaAtual;
+
+                    }
+                    else {
+                        usuarioSelecionado.setSenha(senha);
+
+                    }
+
+                        usuarioSelecionado.setNome(nome);
+                        usuarioSelecionado.setSenha(senha);
+                        usuarioSelecionado.setAdmin(isAdmin);
+
+                        usuarioDAO.atualizarUsuario(usuarioSelecionado);
+
+
+                        JOptionPane.showMessageDialog(null, "Usuário salvo com sucesso!");
+
+                });
+           return panelEditarUserAtual;
+        }
         private JPanel createReportsPanel(){
             JPanel panelReports = new JPanel(null);
 
+            JXButton botaoGerar = new JXButton("Gerar PDF");
+            botaoGerar.setBounds(250, 200, 150, 30);
+            panelReports.add(botaoGerar);
+
+            botaoGerar.addActionListener(e ->{
+
+
+            });
+
+            JXButton botaoGerarExcel = new JXButton("Gerar Excel");
+            botaoGerarExcel.setBounds(450, 200, 150, 30);
+            panelReports.add(botaoGerarExcel);
+
+            botaoGerarExcel.addActionListener(e->{
+
+                excelGenerator.gerarRelatorioExcel(10);
+
+            });
+
+            JXButton botaoVoltarMain = new JXButton("Voltar para a tela principal");
+            botaoVoltarMain.setBounds(325, 250, 200, 30);
+            panelReports.add(botaoVoltarMain);
+
+            botaoVoltarMain.addActionListener(e -> {
+
+                cardLayout.show(cardPanel, "Main");
+
+            });
 
             return panelReports;
         }
 
-       //METODOS UNIVERSAIS
+       //MÉTODOS UNIVERSAIS
 
         private void atualizarTabelaAlertas() {
+            DefaultTableModel model = (DefaultTableModel) tabelaAlertas.getModel();
 
             if (usuarioLogado == null || !usuarioLogado.isAdmin()) {
+               model.setRowCount(0);
                 return;
             }
 
@@ -382,7 +590,6 @@
                 AlertaDAO alertaDAO = new AlertaDAO();
                 List<AlertaDTO> alertas = alertaDAO.buscarUltimosAlertas(10);
 
-                DefaultTableModel model = (DefaultTableModel) tabelaAlertas.getModel();
                 model.setRowCount(0);
 
                 for (AlertaDTO alerta : alertas) {
@@ -399,15 +606,16 @@
         }
 
         private void adicionarTabelaUsuarios(){
+            DefaultTableModel model = (DefaultTableModel) tabelaUsuarios.getModel();
 
             if (usuarioLogado == null || !usuarioLogado.isAdmin()) {
+                model.setRowCount(0);
                 return;
             }
             try{
                 UsuarioDAO usuarios = new UsuarioDAO();
                 List<UsuarioDTO> listaUsuarios = usuarios.buscarTodosUsuarios();
 
-                DefaultTableModel model = (DefaultTableModel) tabelaUsuarios.getModel();
                 model.setRowCount(0);
 
                 for (UsuarioDTO usuarioDTO : listaUsuarios){

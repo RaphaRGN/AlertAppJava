@@ -11,9 +11,10 @@ public class RabbitMQClient {
 
     public void enviarALerta (String alertaRabbit) throws Exception{
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
-        factory.setUsername("guest");
-        factory.setPassword("guest");
+        factory.setHost("192.168.0.16");
+        factory.setPort(5672);
+        factory.setUsername("SentinelHUB");
+        factory.setPassword("root");
 
         try (Connection connection = factory.newConnection();
              Channel channel = connection.createChannel()) {

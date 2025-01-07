@@ -116,11 +116,23 @@ public class UsuarioDAO {
 
     public boolean atualizarUsuario(UsuarioDTO usuario) {
         String sql = "UPDATE usuarios SET nome = ?, senha = ?, admin = ? WHERE id = ?";
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
         try (Connection conn = Database.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, usuario.getNome());
-            stmt.setString(2, usuario.getSenha());
+
+
+            UsuarioDTO usuarioExistente = buscarUsuarioPorId(usuario.getId());
+            if (usuarioExistente != null && !usuarioExistente.getSenha().equals(usuario.getSenha())) {
+                stmt.setString(2, passwordEncoder.encode(usuario.getSenha()));
+
+            } else {
+                stmt.setString(2, usuario.getSenha());
+
+            }
+
             stmt.setBoolean(3, usuario.isAdmin());
             stmt.setLong(4, usuario.getId());
 
