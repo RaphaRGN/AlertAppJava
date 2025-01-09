@@ -7,7 +7,7 @@ import com.rabbitmq.client.ConnectionFactory;
 
 public class RabbitMQClient {
 
-    public static final String NOME_QUEUE = "alertasQueue";
+    public static final String NOME_EXCHANGE = "alertasExchange";
 
     public void enviarALerta (String alertaRabbit) throws Exception{
         ConnectionFactory factory = new ConnectionFactory();
@@ -19,10 +19,9 @@ public class RabbitMQClient {
         try (Connection connection = factory.newConnection();
              Channel channel = connection.createChannel()) {
 
-            channel.queueDeclare(NOME_QUEUE, true, false, false, null);
-            channel.basicPublish("", NOME_QUEUE, null, alertaRabbit.getBytes());
+            channel.exchangeDeclare(NOME_EXCHANGE, "fanout");
+            channel.basicPublish(NOME_EXCHANGE,"", null, alertaRabbit.getBytes());
             System.out.println("Mensagem enviada: " + alertaRabbit);
         }
     }
-
 }

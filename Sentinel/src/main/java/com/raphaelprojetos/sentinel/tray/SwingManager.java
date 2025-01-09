@@ -1,5 +1,6 @@
     package com.raphaelprojetos.sentinel.tray;
 
+    import com.fasterxml.jackson.databind.ObjectMapper;
     import com.formdev.flatlaf.FlatLightLaf;
     import com.raphaelprojetos.sentinel.dao.AlertaDAO;
     import com.raphaelprojetos.sentinel.dao.UsuarioDAO;
@@ -24,6 +25,7 @@
     public class SwingManager extends JFrame implements AlertaConsumer.ConsumerCallback {
 
         private JPanel cardPanel;
+        private AlertaDTO alerta;
         private CardLayout cardLayout;
         private UsuarioDTO usuarioLogado;
         private JXTable tabelaAlertas;
@@ -31,6 +33,51 @@
         private AlertaConsumer alertaConsumer;
         private JFrame popupFrame;
         private ExcelReportGenerator excelGenerator = new ExcelReportGenerator();
+        private Timer tempoRestartDashboard;
+
+        //Método principal
+        public void initApplication() {
+            JFrame telaPrincipal = new JFrame("Sentinel");
+            telaPrincipal.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+            telaPrincipal.setSize(1000, 800);
+            telaPrincipal.setLocationRelativeTo(null);
+
+            cardLayout = new CardLayout();
+            cardPanel = new JPanel(cardLayout);
+            telaPrincipal.add(cardPanel);
+
+            JPanel mainPanel = createMainPanel(); //Main
+            JPanel loginPanel = createLoginPanel(); // Tela de login
+            JPanel configPanel = createConfigPanel();
+            JPanel activeUsersPanel = createactiveUsersPanel(); //Tabela usuários
+            JPanel newUserPanel = createnewUserPanel(); // Criar novo usuário
+            JPanel reportsPanel = createReportsPanel(); // Excel, PDF etc.
+
+
+            cardPanel.add(mainPanel, "Main");
+            cardPanel.add(loginPanel, "Login");
+            cardPanel.add(configPanel, "Config");
+            cardPanel.add(activeUsersPanel, "activeUsers");
+            cardPanel.add(reportsPanel, "Reports");
+            cardPanel.add(newUserPanel, "newUser");
+
+
+            telaPrincipal.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowActivated(WindowEvent e) {
+                    atualizarNomeBotao((JXButton) mainPanel.getComponent(0)); // Atualiza o botão de login
+                    atualizarTabelaAlertas(); // Atualiza a tabela de alertas
+                    adicionarTabelaUsuarios();
+                }
+            });
+
+            telaPrincipal.setVisible(true);
+        }
+
+        public static AlertaDTO desserializarAlerta(String mensagemJson) throws Exception {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(mensagemJson, AlertaDTO.class);
+        }
 
         public void showInterface() {
             SwingUtilities.invokeLater(this::initApplication);
@@ -43,14 +90,20 @@
         }
 
         @Override
-        public void onMessageReceived(String mensagem) {
+        public void onMessageReceived(String mensagemJson) {
             SwingUtilities.invokeLater(() -> {
-                mostrarPopup(mensagem);
+                try {
+                    AlertaDTO alerta = desserializarAlerta(mensagemJson);
+
+                    mostrarPopup(alerta);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
                 atualizarTabelaAlertas();
             });
         }
 
-        private void mostrarPopup(String mensagem) {
+        private void mostrarPopup(AlertaDTO alerta) {
             if (popupFrame != null && popupFrame.isVisible()) {
                 popupFrame.dispose();
             }
@@ -63,7 +116,13 @@
             bloqueioFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
             bloqueioFrame.setBackground(new Color(0, 0, 0, 200)); // Fundo semitransparente
 
-            JLabel mensagemLabel = new JLabel("<html><h1 style='text-align:center;color:white;'>" + mensagem + "</h1></html>");
+            JLabel mensagemLabel = new JLabel("<html>" +
+                    "<h1 style='text-align:center;'>" + alerta.getTitulo() + "</h1>" +
+                    "<p><strong style= 'font-size: 16rem;'>Código:</strong> " + alerta.getCodigo() + "</p>" +
+                    "<p><strong>Descrição:</strong> " + alerta.getDescricao() + "</p>" +
+                    "<p><strong>Data/Hora:</strong> " + alerta.getTempoFormatado() + "</p>" +
+                    "</html>");
+
             mensagemLabel.setHorizontalAlignment(SwingConstants.CENTER);
             bloqueioFrame.add(mensagemLabel);
 
@@ -94,42 +153,6 @@
             }
         };
 
-        //Método principal
-        public void initApplication() {
-            JFrame telaPrincipal = new JFrame("Sentinel");
-            telaPrincipal.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-            telaPrincipal.setSize(1000, 800);
-            telaPrincipal.setLocationRelativeTo(null);
-
-            cardLayout = new CardLayout();
-            cardPanel = new JPanel(cardLayout);
-            telaPrincipal.add(cardPanel);
-
-            JPanel mainPanel = createMainPanel();
-            JPanel loginPanel = createLoginPanel();
-            JPanel configPanel = createConfigPanel();
-            JPanel userPanel = createUserPanel();
-            JPanel reportsPanel = createReportsPanel();
-
-
-            cardPanel.add(mainPanel, "Main");
-            cardPanel.add(loginPanel, "Login");
-            cardPanel.add(configPanel, "Config");
-            cardPanel.add(reportsPanel, "Reports");
-            cardPanel.add(userPanel, "User");
-
-
-            telaPrincipal.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowActivated(WindowEvent e) {
-                    atualizarNomeBotao((JXButton) mainPanel.getComponent(0)); // Atualiza o botão de login
-                    atualizarTabelaAlertas(); // Atualiza a tabela de alertas
-                    adicionarTabelaUsuarios();
-                }
-            });
-
-            telaPrincipal.setVisible(true);
-        }
 
         private JPanel createMainPanel() {
             JPanel panelMain = new JPanel(null);
@@ -172,7 +195,7 @@
 
             JXButton botaoReports = new JXButton("Gerar relatórios");
             botaoReports.setBounds(440, 10, 150, 30);
-            botaoReports.addActionListener( e-> cardLayout.show(cardPanel, "Reports"));
+            botaoReports.addActionListener(e -> cardLayout.show(cardPanel, "Reports"));
             panelMain.add(botaoReports);
 
 
@@ -266,7 +289,6 @@
                             rabbitClient.enviarALerta(alerta.toJson());
 
                             atualizarTabelaAlertas();
-                            trazerTelaNoFocus((JFrame) SwingUtilities.getWindowAncestor(cardPanel), "Config");
 
                         } catch (Exception ex) {
                             JOptionPane.showMessageDialog(null, "Erro ao enviar o alerta: " + ex.getMessage());
@@ -325,6 +347,47 @@
         private JPanel createConfigPanel() {
             JPanel panelConfig = new JPanel(null);
 
+            JXButton botaoUsuarios = new JXButton("Ver usuários");
+            botaoUsuarios.setBounds(150, 460, 200, 30);
+            panelConfig.add(botaoUsuarios);
+            botaoUsuarios.addActionListener(e -> {
+
+                cardLayout.show(cardPanel, "activeUsers");
+
+            });
+
+            JCheckBox checkBoxDashborad = new JCheckBox("Modo Dashboard");
+            checkBoxDashborad.setBounds(150, 150, 200, 30);
+            panelConfig.add(checkBoxDashborad);
+            boolean ativarModoDashboard = checkBoxDashborad.isSelected();
+            checkBoxDashborad.addActionListener(e->{
+
+                if (checkBoxDashborad.isSelected()) {
+                    JOptionPane.showMessageDialog(null, "Modo Dashboard ativo ! " +
+                            "Agora o painel irá atualizar de 20 em 20 minutos, ideal para colocar na TV !");
+                    System.out.println(tempoRestartDashboard);
+                    tempoRestartDashboard = new Timer(20000, event -> {
+                        atualizarTabelaAlertas();
+                    });
+                    tempoRestartDashboard.start();
+
+                } else {
+                    if (tempoRestartDashboard != null && tempoRestartDashboard.isRunning() && !checkBoxDashborad.isSelected()) {
+
+                        tempoRestartDashboard.stop();
+                        tempoRestartDashboard = null;
+                        JOptionPane.showMessageDialog(null, "Modo Dashboard desativado !");
+
+                    }
+                }
+            });
+
+            return panelConfig;
+        }
+
+        private JPanel createactiveUsersPanel() {
+            JPanel panelUsuariosAtivos = new JPanel(null);
+
             tabelaUsuarios = new JXTable(new DefaultTableModel(new Object[]{"ID", "Nome", "Administrador"}, 0) {
                 @Override
                 public boolean isCellEditable(int row, int column) {
@@ -334,13 +397,13 @@
 
             JScrollPane scrollPane = new JScrollPane(tabelaUsuarios);
             scrollPane.setBounds(50, 50, 900, 400);
-            panelConfig.add(scrollPane);
+            panelUsuariosAtivos.add(scrollPane);
 
 
             JXButton botaoVoltarMain = new JXButton("Voltar para a tela principal");
             botaoVoltarMain.setBounds(150, 460, 200, 30);
-            botaoVoltarMain.addActionListener(e -> cardLayout.show(cardPanel, "Main"));
-            panelConfig.add(botaoVoltarMain);
+            botaoVoltarMain.addActionListener(e -> cardLayout.show(cardPanel, "Config"));
+            panelUsuariosAtivos.add(botaoVoltarMain);
 
             JPopupMenu popupMenuConfig = new JPopupMenu();
             JMenuItem item1Config = new JMenuItem("Criar novo usuário");
@@ -364,7 +427,7 @@
             });
 
             item1Config.addActionListener(e -> {
-                cardLayout.show(cardPanel, "User");
+                cardLayout.show(cardPanel, "newUser");
 
             });
             JMenuItem item2EditarUser = new JMenuItem("Editar usuário");
@@ -407,10 +470,10 @@
                     }
             });
 
-            return panelConfig;
+            return panelUsuariosAtivos;
         }
 
-        private JPanel createUserPanel() {
+        private JPanel createnewUserPanel() {
             JPanel panelCriacaoUsuario = new JPanel(null);
             panelCriacaoUsuario.setBounds(200, 200, 400, 300);
 
@@ -449,7 +512,7 @@
                     usuarioDAO.salvarUsuario(novoUsuario);
 
                     JOptionPane.showMessageDialog(null, "Usuário criado com sucesso!");
-                    cardLayout.show(cardPanel, "Config");
+                    cardLayout.show(cardPanel, "activeUsers");
 
                 } catch (Exception exception) {
                     JOptionPane.showMessageDialog(null, "Erro ao criar usuário !" + exception.getMessage());
@@ -461,7 +524,7 @@
 
             JButton botaoVoltar = new JButton("Voltar");
             botaoVoltar.setBounds(150, 250, 150, 30);
-            botaoVoltar.addActionListener(e -> cardLayout.show(cardPanel, "Config"));
+            botaoVoltar.addActionListener(e -> cardLayout.show(cardPanel, "activeUsers"));
             panelCriacaoUsuario.add(botaoVoltar);
 
             return panelCriacaoUsuario;
@@ -499,10 +562,12 @@
 
                 checkboxAdmin.setSelected(userEAdmin);
 
+
                 JXButton botaoIrParaMain = new JXButton("Voltar");
-                botaoIrParaMain.setBounds(250, 200, 150, 30);
+                botaoIrParaMain.setBounds(310, 200, 150, 30);
+                panelEditarUserAtual.add(botaoIrParaMain);
                 botaoIrParaMain.addActionListener(e->{
-                    cardLayout.show(cardPanel, "Main");
+                    cardLayout.show(cardPanel, "activeUsers");
 
                         });
 
@@ -544,11 +609,11 @@
         private JPanel createReportsPanel(){
             JPanel panelReports = new JPanel(null);
 
-            JXButton botaoGerar = new JXButton("Gerar PDF");
-            botaoGerar.setBounds(250, 200, 150, 30);
-            panelReports.add(botaoGerar);
+            JXButton botaoGerarPDF = new JXButton("Gerar PDF");
+            botaoGerarPDF.setBounds(250, 200, 150, 30);
+            panelReports.add(botaoGerarPDF);
 
-            botaoGerar.addActionListener(e ->{
+            botaoGerarPDF.addActionListener(e ->{
 
 
             });

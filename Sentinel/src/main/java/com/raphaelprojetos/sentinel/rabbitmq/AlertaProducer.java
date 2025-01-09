@@ -14,7 +14,7 @@ public class AlertaProducer {
     }
 
     public void enviarAlertas (String alertaJson){
-        rabbitTemplate.convertAndSend(RabbitMQConfig.NOME_EXCHANGE, "alertasRoutingKey",alertaJson);
+        rabbitTemplate.convertAndSend(RabbitMQConfig.NOME_EXCHANGE, "", alertaJson);
         System.out.println("Alerta enviado: " + alertaJson);
 
     }

@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 public class AlertaConsumer {
 
     private static final String NOME_QUEUE = "alertasQueue"; // Define o nome da fila
+    private static final String NOME_EXCHANGE = "alertasExchange";
     private static final Logger LOGGER = Logger.getLogger(AlertaConsumer.class.getName()); //Logger
     private final Channel channel; //Faz o channel
 
@@ -27,15 +28,24 @@ public class AlertaConsumer {
         this.channel = connection.createChannel();
         LOGGER.info("Conexão com RabbitMQ estabelecida.");
 
-        channel.queueDeclare(NOME_QUEUE, true, false, false, null);
+       channel.exchangeDeclare(NOME_EXCHANGE, "fanout");
         LOGGER.info("Fila '" + NOME_QUEUE + "' declarada com sucesso.");
 
-        channel.basicConsume(NOME_QUEUE, true, (consumerTag, delivery) -> {
+        String nomeFila = channel.queueDeclare().getQueue();
+        LOGGER.info("Fila temporária criada: " + nomeFila);
+
+        // Vincula a fila ao exchange
+        channel.queueBind(nomeFila, NOME_EXCHANGE, "");
+        LOGGER.info("Fila '" + nomeFila + "' vinculada ao exchange '" + NOME_EXCHANGE + "'.");
+
+        // Consome mensagens da fila
+        channel.basicConsume(nomeFila, true, (consumerTag, delivery) -> {
             String mensagem = new String(delivery.getBody(), StandardCharsets.UTF_8);
             LOGGER.info("Mensagem recebida: " + mensagem);
             callback.onMessageReceived(mensagem);
         }, consumerTag -> LOGGER.info("Cancelamento do consumidor: " + consumerTag));
     }
+
 
     public interface ConsumerCallback {
         void onMessageReceived(String mensagem);

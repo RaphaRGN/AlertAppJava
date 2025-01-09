@@ -14,6 +14,7 @@ public class Database {
 
 
     static {
+
         String endercoAtualBanco = System.getenv("DB_HOST");
         String usuarioBanco = System.getenv("DB_USER");
         String nomeBanco = "Sentinel";
