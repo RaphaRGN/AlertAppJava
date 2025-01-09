@@ -9,9 +9,12 @@
     import com.raphaelprojetos.sentinel.rabbitmq.AlertaConsumer;
     import com.raphaelprojetos.sentinel.rabbitmq.RabbitMQClient;
     import com.raphaelprojetos.sentinel.report.ExcelReportGenerator;
+    import com.raphaelprojetos.sentinel.weather.WeatherManager;
     import org.jdesktop.swingx.JXButton;
     import org.jdesktop.swingx.JXTable;
     import org.jdesktop.swingx.JXTextField;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.context.annotation.Lazy;
     import org.springframework.stereotype.Component;
 
     import javax.swing.*;
@@ -23,6 +26,9 @@
 
     @Component
     public class SwingManager extends JFrame implements AlertaConsumer.ConsumerCallback {
+
+        @Lazy
+        private WeatherManager weatherManager = new WeatherManager();
 
         private JPanel cardPanel;
         private AlertaDTO alerta;
@@ -382,6 +388,12 @@
                 }
             });
 
+            String weather = weatherManager.parseWeather(weatherManager.getactualWeather("Blumenau"));
+            JLabel weatherLabel = new JLabel("<html>Clima atual:<br>" + weather + "</html>");
+            weatherLabel.setBounds(50, 50, 900, 400);
+            panelConfig.add(weatherLabel);
+
+
             return panelConfig;
         }
 
@@ -399,10 +411,9 @@
             scrollPane.setBounds(50, 50, 900, 400);
             panelUsuariosAtivos.add(scrollPane);
 
-
             JXButton botaoVoltarMain = new JXButton("Voltar para a tela principal");
             botaoVoltarMain.setBounds(150, 460, 200, 30);
-            botaoVoltarMain.addActionListener(e -> cardLayout.show(cardPanel, "Config"));
+            botaoVoltarMain.addActionListener(e -> cardLayout.show(cardPanel, "Main"));
             panelUsuariosAtivos.add(botaoVoltarMain);
 
             JPopupMenu popupMenuConfig = new JPopupMenu();
@@ -486,7 +497,7 @@
             campoSenhaUsuario.setBounds(150, 100, 200, 30);
             panelCriacaoUsuario.add(campoSenhaUsuario);
 
-            JCheckBox checkboxAdmin = new JCheckBox();
+            JCheckBox checkboxAdmin = new JCheckBox("Usuário administrador");
             checkboxAdmin.setBounds(150, 150, 200, 30);
             panelCriacaoUsuario.add(checkboxAdmin);
 
@@ -556,7 +567,7 @@
                 panelEditarUserAtual.add(campoSenhaUsuarioAtual);
 
                 boolean userEAdmin = usuarioSelecionado.isAdmin();
-                JCheckBox checkboxAdmin = new JCheckBox();
+                JCheckBox checkboxAdmin = new JCheckBox("Usuário administrador");
                 checkboxAdmin.setBounds(150, 150, 200, 30);
                 panelEditarUserAtual.add(checkboxAdmin);
 
